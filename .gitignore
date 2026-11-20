@@ -1,0 +1,8 @@
+# Only the live placeholder site is published from this folder.
+# Everything else (drafts, mockups, notes) stays on the laptop.
+/*
+!/.gitignore
+!/index.html
+!/me.jpg
+!/favicon.svg
+!/CNAME

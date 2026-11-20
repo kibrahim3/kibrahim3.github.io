@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kyrellos Ibrahim</title>
+  <meta name="description" content="Kyrellos Ibrahim is a PhD student at UCSF using deep learning to engineer polyketide synthases for materials biosynthesis.">
+  <link rel="canonical" href="https://kyrellos.com/">
+  <meta property="og:title" content="Kyrellos Ibrahim">
+  <meta property="og:description" content="PhD student at UCSF using deep learning to engineer polyketide synthases for materials biosynthesis.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://kyrellos.com/">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    /*
+      ============================================================
+      TEMPORARY PLACEHOLDER PAGE
+      A black screen with one small photo bouncing around it.
+      The photo runs away from the mouse if you try to point at it,
+      and bounces off the mouse if the mouse is sitting still.
+      The real home page is saved next to this file as
+      index-draft.html. To bring it back, delete this file and
+      rename index-draft.html to index.html.
+
+      Things you can change here without touching anything else:
+        - the photo:  replace the file  me.jpg  (keep the name)
+        - its size:   the  width  line under  #me  below
+        - its speed:  the  SPEED  number near the bottom
+        - how it dodges the mouse:  FLEE_SPEED,  REACH  and  IDLE_AFTER,
+                                    right below SPEED
+      ============================================================
+    */
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #me {
+      /* Centered until the script takes over (and if motion is turned off). */
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: clamp(27px, 5.1vmin, 48px);
+      height: auto;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    #me.bouncing {
+      inset: auto;
+      top: 0;
+      left: 0;
+      margin: 0;
+      will-change: transform;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="visually-hidden">Kyrellos Ibrahim</h1>
+
+  <!-- If me.jpg is missing, the "KI" icon bounces instead so the page is never empty. -->
+  <img id="me" src="me.jpg" alt="Kyrellos Ibrahim" draggable="false"
+       onerror="this.onerror=null; this.src='favicon.svg';">
+
+  <script>
+    (function () {
+      var SPEED = 150;       // normal drifting speed, in pixels per second
+      var FLEE_SPEED = 900;  // top speed when it is running away from the mouse
+      var REACH = 3;         // how close the mouse can get before it reacts,
+                             // measured in photo-widths from the photo's middle
+      var IDLE_AFTER = 1;    // seconds the mouse must sit still before the photo stops
+                             // running from it and just bounces off it like a wall
+
+      var img = document.getElementById('me');
+
+      // People who ask their device for less motion get the photo sitting still.
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      var x, y, vx, vy, w, h, last;
+      var pointer = null;  // where the mouse (or a finger) is and when it last moved,
+                           // or null if it is away
+
+      function measure() {
+        w = img.offsetWidth;
+        h = img.offsetHeight;
+      }
+
+      function randomHeading(speed) {
+        // A diagonal that is never too flat or too steep, so it visits the whole screen.
+        var angle = (25 + Math.random() * 40) * Math.PI / 180;
+        vx = speed * Math.cos(angle) * (Math.random() < 0.5 ? -1 : 1);
+        vy = speed * Math.sin(angle) * (Math.random() < 0.5 ? -1 : 1);
+      }
+
+      function start() {
+        img.classList.add('bouncing');
+        measure();
+        x = Math.random() * Math.max(0, window.innerWidth - w);
+        y = Math.random() * Math.max(0, window.innerHeight - h);
+        randomHeading(SPEED);
+        last = performance.now();
+        requestAnimationFrame(step);
+      }
+
+      // Steer away from the mouse. Returns true while the mouse is close enough to matter.
+      function flee(dt, maxX, maxY) {
+        if (!pointer) return false;
+
+        var dx = x + w / 2 - pointer.x;
+        var dy = y + h / 2 - pointer.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var reach = Math.max(w, h) * REACH;
+        if (dist >= reach) return false;
+
+        // Direction pointing straight away from the mouse.
+        var ax, ay;
+        if (dist < 0.5) {
+          var a = Math.random() * 2 * Math.PI;
+          ax = Math.cos(a); ay = Math.sin(a);
+        } else {
+          ax = dx / dist; ay = dy / dist;
+        }
+
+        // If "away" points into a wall, slide along the wall instead of
+        // pressing against it, and break out of corners toward open space.
+        var edge = 3;
+        var blockedX = (x <= edge && ax < 0) || (x >= maxX - edge && ax > 0);
+        var blockedY = (y <= edge && ay < 0) || (y >= maxY - edge && ay > 0);
+        if (blockedX && blockedY) {
+          if (Math.abs(dx) > Math.abs(dy)) { ay = ay < 0 ? 1 : -1; ax = 0; }
+          else                             { ax = ax < 0 ? 1 : -1; ay = 0; }
+        } else if (blockedX) {
+          ay = Math.abs(ay) > 0.15 ? (ay < 0 ? -1 : 1) : (y < maxY / 2 ? 1 : -1);
+          ax = 0;
+        } else if (blockedY) {
+          ax = Math.abs(ax) > 0.15 ? (ax < 0 ? -1 : 1) : (x < maxX / 2 ? 1 : -1);
+          ay = 0;
+        }
+
+        // The closer the mouse, the faster it runs and the harder it turns.
+        var closeness = 1 - dist / reach;
+        var fleeSpeed = SPEED + (FLEE_SPEED - SPEED) * closeness;
+        var turn = Math.min(1, 30 * closeness * dt);
+        vx += (ax * fleeSpeed - vx) * turn;
+        vy += (ay * fleeSpeed - vy) * turn;
+        return true;
+      }
+
+      // With the mouse out of the way, ease back to the normal speed and
+      // nudge the heading back to a diagonal if the escape left it too flat.
+      function settle(dt) {
+        var s = Math.sqrt(vx * vx + vy * vy);
+        if (s < 1) { randomHeading(SPEED); return; }
+        var ux = vx / s, uy = vy / s;
+        if (Math.abs(ux) < 0.42) ux += (ux < 0 ? -1 : 1) * 1.5 * dt;
+        if (Math.abs(uy) < 0.42) uy += (uy < 0 ? -1 : 1) * 1.5 * dt;
+        var n = Math.sqrt(ux * ux + uy * uy);
+        s += (SPEED - s) * Math.min(1, 2.5 * dt);
+        vx = ux / n * s;
+        vy = uy / n * s;
+      }
+
+      // Hard rule: the mouse never gets to actually touch the photo. If a fast
+      // swipe lands inside the photo's personal space, the photo is moved to the
+      // nearest free spot on the edge of that space and darts off from there.
+      // (Against a wall that slides it sideways; in a corner it hops out.)
+      function keepClear(maxX, maxY) {
+        if (!pointer) return;
+
+        var space = 0.5 * Math.sqrt(w * w + h * h) + 0.3 * Math.max(w, h);
+        var dx = x + w / 2 - pointer.x;
+        var dy = y + h / 2 - pointer.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist >= space) return;
+
+        var away = dist < 0.5 ? Math.random() * 2 * Math.PI : Math.atan2(dy, dx);
+        // When it has to go sideways, prefer the side it was already heading toward.
+        var side = Math.cos(away) * vy - Math.sin(away) * vx >= 0 ? 1 : -1;
+
+        // Try straight away from the mouse first, then fan out further and
+        // further to each side until a spot that is fully on screen turns up.
+        for (var i = 0; i <= 48; i++) {
+          var a = away + Math.ceil(i / 2) * (Math.PI / 24) * (i % 2 ? side : -side);
+          var nx = pointer.x + Math.cos(a) * space - w / 2;
+          var ny = pointer.y + Math.sin(a) * space - h / 2;
+          if (nx >= 0 && nx <= maxX && ny >= 0 && ny <= maxY) {
+            var s = Math.max(Math.sqrt(vx * vx + vy * vy), FLEE_SPEED * 0.75);
+            x = nx; y = ny;
+            vx = Math.cos(a) * s; vy = Math.sin(a) * s;
+            return;
+          }
+        }
+      }
+
+      // A mouse that is sitting still is just an obstacle: the photo bounces off
+      // the little arrow the same way it bounces off the edges of the screen.
+      function bounceOffMouse(maxX, maxY) {
+        // Roughly the box the arrow is drawn in (its tip is the top-left corner).
+        var left = pointer.x - 1, right = pointer.x + 12;
+        var top = pointer.y - 1,  bottom = pointer.y + 18;
+
+        var overlapX = Math.min(x + w, right) - Math.max(x, left);
+        var overlapY = Math.min(y + h, bottom) - Math.max(y, top);
+        if (overlapX <= 0 || overlapY <= 0) return;
+
+        var fromLeft = x + w / 2 < (left + right) / 2;
+        var fromTop = y + h / 2 < (top + bottom) / 2;
+        var outX = fromLeft ? left - w : right;   // where the photo would sit after
+        var outY = fromTop ? top - h : bottom;    // being pushed clear on each axis
+
+        // Bounce off whichever face it only just touched; if there is no room on
+        // screen to do that (arrow jammed against an edge), use the other face.
+        var sideways = overlapX < overlapY;
+        for (var attempt = 0; attempt < 2; attempt++) {
+          if (sideways && outX >= 0 && outX <= maxX) {
+            x = outX; vx = fromLeft ? -Math.abs(vx) : Math.abs(vx);
+            return;
+          }
+          if (!sideways && outY >= 0 && outY <= maxY) {
+            y = outY; vy = fromTop ? -Math.abs(vy) : Math.abs(vy);
+            return;
+          }
+          sideways = !sideways;
+        }
+      }
+
+      function step(now) {
+        // Cap the time step so the photo does not teleport after the tab was hidden.
+        var dt = Math.min((now - last) / 1000, 0.05);
+        last = now;
+
+        var maxX = Math.max(0, window.innerWidth - w);
+        var maxY = Math.max(0, window.innerHeight - h);
+
+        // Has the mouse been sitting still long enough to count as an obstacle?
+        var idle = pointer !== null && now - pointer.t > IDLE_AFTER * 1000;
+
+        if (idle || !flee(dt, maxX, maxY)) settle(dt);
+
+        x += vx * dt;
+        y += vy * dt;
+
+        if (x <= 0)    { x = 0;    vx = Math.abs(vx); }
+        if (x >= maxX) { x = maxX; vx = -Math.abs(vx); }
+        if (y <= 0)    { y = 0;    vy = Math.abs(vy); }
+        if (y >= maxY) { y = maxY; vy = -Math.abs(vy); }
+
+        if (idle) bounceOffMouse(maxX, maxY);
+        else keepClear(maxX, maxY);
+
+        img.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
+        requestAnimationFrame(step);
+      }
+
+      window.addEventListener('resize', measure);
+
+      // Keep track of the mouse. A finger on a touch screen counts too,
+      // but only while it is actually touching.
+      function track(e) { pointer = { x: e.clientX, y: e.clientY, t: performance.now() }; }
+      function forget() { pointer = null; }
+      window.addEventListener('pointermove', track);
+      window.addEventListener('pointerdown', track);
+      window.addEventListener('pointerup', function (e) { if (e.pointerType !== 'mouse') forget(); });
+      window.addEventListener('pointercancel', forget);
+      document.documentElement.addEventListener('pointerleave', forget);
+
+      // Wait until the picture has a size (this also covers the fallback icon).
+      if (img.complete && img.naturalWidth > 0) start();
+      else img.addEventListener('load', start, { once: true });
+    })();
+  </script>
+
+</body>
+</html>
