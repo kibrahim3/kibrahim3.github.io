@@ -38,6 +38,13 @@
                            (0 is invisible, 1 is solid white)
         - how fast it flashes:  the  2s  on the  animation  line below
         - to remove it:    delete the  <p id="status">  line
+
+      And a secret: pressing Shift+Cmd+K makes the photo slow to a crawl and
+      stop dodging for 3 seconds. Clicking it in that time opens soon.html.
+        - how long you get:   CATCH_SECONDS  near the bottom
+        - how slow it creeps: CRAWL_SPEED,   right below that
+        - where it sends you: SECRET_PAGE,   right below that
+        - the keys:           the line with  'KeyK'  a little further down
       ============================================================
     */
     html, body {
@@ -131,9 +138,28 @@
       var IDLE_AFTER = 1;    // seconds the mouse must sit still before the photo stops
                              // running from it and just bounces off it like a wall
 
+      var CATCH_SECONDS = 3;         // how long the secret keys make the photo catchable
+      var CRAWL_SPEED = 15;          // how fast it creeps during that time, in pixels per second
+      var SECRET_PAGE = 'soon.html'; // where a successful click on the photo goes
+
       var img = document.getElementById('me');
 
+      // The secret: Shift+Cmd+K (Shift+Ctrl+K on Windows) opens a short window in
+      // which the photo slows to a crawl and stops dodging. Click it in time and
+      // you are sent to SECRET_PAGE. Nothing on screen says the window is open.
+      var catchUntil = 0;
+      window.addEventListener('keydown', function (e) {
+        // e.code is the physical K key, whatever letter the modifiers turn it into.
+        if (e.code !== 'KeyK' || !e.shiftKey || !(e.metaKey || e.ctrlKey) || e.altKey || e.repeat) return;
+        e.preventDefault();
+        catchUntil = performance.now() + CATCH_SECONDS * 1000;
+      });
+      img.addEventListener('click', function () {
+        if (performance.now() < catchUntil) window.location.href = SECRET_PAGE;
+      });
+
       // People who ask their device for less motion get the photo sitting still.
+      // (The secret still works for them: the photo is just already not moving.)
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
       var x, y, vx, vy, w, h, last;
@@ -220,6 +246,15 @@
         vy = uy / n * s;
       }
 
+      // While the secret window is open: brake hard down to a creep, same direction.
+      function crawl(dt) {
+        var s = Math.sqrt(vx * vx + vy * vy);
+        if (s < 0.01) { randomHeading(CRAWL_SPEED); return; }
+        var ns = s + (CRAWL_SPEED - s) * Math.min(1, 10 * dt);
+        vx *= ns / s;
+        vy *= ns / s;
+      }
+
       // Hard rule: the mouse never gets to actually touch the photo. If a fast
       // swipe lands inside the photo's personal space, the photo is moved to the
       // nearest free spot on the edge of that space and darts off from there.
@@ -295,7 +330,11 @@
         // Has the mouse been sitting still long enough to count as an obstacle?
         var idle = pointer !== null && now - pointer.t > IDLE_AFTER * 1000;
 
-        if (idle || !flee(dt, maxX, maxY)) settle(dt);
+        // Is the secret window open? Then it creeps and lets the mouse reach it.
+        var catching = now < catchUntil;
+
+        if (catching) crawl(dt);
+        else if (idle || !flee(dt, maxX, maxY)) settle(dt);
 
         x += vx * dt;
         y += vy * dt;
@@ -305,7 +344,8 @@
         if (y <= 0)    { y = 0;    vy = Math.abs(vy); }
         if (y >= maxY) { y = maxY; vy = -Math.abs(vy); }
 
-        if (idle) bounceOffMouse(maxX, maxY);
+        if (catching) { /* the mouse is allowed to touch it */ }
+        else if (idle) bounceOffMouse(maxX, maxY);
         else keepClear(maxX, maxY);
 
         img.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';

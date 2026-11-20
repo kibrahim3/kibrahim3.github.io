@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>soon</title>
+  <!-- This page is the prize for the secret on the home page, so keep it out of search results. -->
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    /*
+      ============================================================
+      THE SECRET PAGE
+      You land here by pressing Shift+Cmd+K on the home page and
+      clicking the photo within 3 seconds.
+
+      Things you can change here without touching anything else:
+        - the words:    the  <p id="words">  line below
+        - the sticker:  replace the file  caught_building.png  (keep the name).
+                        If there is no caught_building.png the page just shows the words.
+        - its size:     the  width  line under  #sticker  below
+      ============================================================
+    */
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #000;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 24px;
+      box-sizing: border-box;
+      font: 15px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      letter-spacing: 0.04em;
+      color: #d9d9d9;
+      text-align: center;
+    }
+
+    #sticker {
+      width: min(240px, 60vw);
+      height: auto;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    a {
+      color: #8f8f8f;
+      font-size: 13px;
+      text-underline-offset: 3px;
+    }
+
+    a:hover,
+    a:focus-visible {
+      color: #d9d9d9;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- If caught_building.png is missing, it is removed so no broken-image icon shows. -->
+  <img id="sticker" src="caught_building.png" alt="" draggable="false" onerror="this.remove();">
+
+  <p id="words">you caught me building something<br>come back later</p>
+
+  <a href="index.html">back</a>
+
+</body>
+</html>
