@@ -30,6 +30,14 @@
         - its speed:  the  SPEED  number near the bottom
         - how it dodges the mouse:  FLEE_SPEED,  REACH  and  IDLE_AFTER,
                                     right below SPEED
+
+      There is also a faint status line that flashes on and off, and shows
+      up somewhere new each time:
+        - what it says:    the  <p id="status">  line further down
+        - how faint it is: the  --faint  number under  #status  below
+                           (0 is invisible, 1 is solid white)
+        - how fast it flashes:  the  2s  on the  animation  line below
+        - to remove it:    delete the  <p id="status">  line
       ============================================================
     */
     html, body {
@@ -59,6 +67,41 @@
       will-change: transform;
     }
 
+    #status {
+      --faint: 0.3;
+      /* Sits still near the bottom until the script takes over (and if motion is turned off). */
+      position: fixed;
+      left: 50%;
+      bottom: 8vh;
+      transform: translateX(-50%);
+      margin: 0;
+      font: 13px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      letter-spacing: 0.04em;
+      color: #fff;
+      opacity: var(--faint);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    #status.flashing {
+      left: 0;
+      top: 0;
+      bottom: auto;
+      opacity: 0;
+      animation: status-flash 2s linear infinite;
+    }
+
+    /* Dark for a moment (this is when it moves), fade in, stay, fade out, dark again. */
+    @keyframes status-flash {
+      0%   { opacity: 0; }
+      10%  { opacity: 0; }
+      22%  { opacity: var(--faint); }
+      65%  { opacity: var(--faint); }
+      77%  { opacity: 0; }
+      100% { opacity: 0; }
+    }
+
     .visually-hidden {
       position: absolute;
       width: 1px;
@@ -72,6 +115,8 @@
 <body>
 
   <h1 class="visually-hidden">Kyrellos Ibrahim</h1>
+
+  <p id="status">status: im rly sick rn</p>
 
   <!-- If me.jpg is missing, the "KI" icon bounces instead so the page is never empty. -->
   <img id="me" src="me.jpg" alt="Kyrellos Ibrahim" draggable="false"
@@ -282,6 +327,42 @@
       // Wait until the picture has a size (this also covers the fallback icon).
       if (img.complete && img.naturalWidth > 0) start();
       else img.addEventListener('load', start, { once: true });
+    })();
+
+    // The status line: each time it has faded out, move it somewhere new
+    // before it fades back in.
+    (function () {
+      var el = document.getElementById('status');
+      if (!el) return;
+
+      // People who ask their device for less motion get it sitting still, not flashing.
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      var EDGE = 12;  // keep at least this many pixels from the edges of the screen
+      var sx = null, sy = null;
+
+      function move() {
+        var roomX = Math.max(0, window.innerWidth - el.offsetWidth - 2 * EDGE);
+        var roomY = Math.max(0, window.innerHeight - el.offsetHeight - 2 * EDGE);
+        var farEnough = 0.25 * Math.min(window.innerWidth, window.innerHeight);
+        var nx, ny;
+
+        // Pick a random spot, trying again if it lands too close to the last one.
+        for (var i = 0; i < 20; i++) {
+          nx = EDGE + Math.random() * roomX;
+          ny = EDGE + Math.random() * roomY;
+          if (sx === null) break;
+          var dx = nx - sx, dy = ny - sy;
+          if (Math.sqrt(dx * dx + dy * dy) >= farEnough) break;
+        }
+
+        sx = nx; sy = ny;
+        el.style.transform = 'translate(' + Math.round(nx) + 'px,' + Math.round(ny) + 'px)';
+      }
+
+      el.classList.add('flashing');
+      move();
+      el.addEventListener('animationiteration', move);
     })();
   </script>
 
