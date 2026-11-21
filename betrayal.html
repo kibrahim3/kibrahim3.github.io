@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>betrayal</title>
+  <!-- Reached by a typed code on the home page, so keep it out of search results. -->
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    /*
+      ============================================================
+      Things you can change here without touching anything else:
+        - the picture:  replace the file  tired_kiki.png  (keep the name).
+                        If there is no tired_kiki.png the page shows only the back link.
+        - its size:     the  width  and  max-height  lines under  #picture  below
+        - the words:    the  <p id="words">  line below
+      ============================================================
+    */
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #000;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 24px;
+      box-sizing: border-box;
+      font: 15px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      letter-spacing: 0.04em;
+      color: #d9d9d9;
+      text-align: center;
+    }
+
+    #picture {
+      width: auto;
+      max-width: min(420px, 80vw);
+      height: auto;
+      max-height: 70vh;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    a {
+      color: #8f8f8f;
+      font-size: 13px;
+      text-underline-offset: 3px;
+    }
+
+    a:hover,
+    a:focus-visible {
+      color: #d9d9d9;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- If tired_kiki.png is missing, it is removed so no broken-image icon shows. -->
+  <img id="picture" src="tired_kiki.png" alt="tired kiki" draggable="false" onerror="this.remove();">
+
+  <p id="words">how can you do this to me</p>
+
+  <a href="index.html">back</a>
+
+</body>
+</html>

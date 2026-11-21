@@ -404,6 +404,29 @@
       move();
       el.addEventListener('animationiteration', move);
     })();
+
+    // A typed code: press the CODE_KEY key CODE_COUNT times in a row to open CODE_PAGE.
+    (function () {
+      var CODE_KEY = '4';
+      var CODE_COUNT = 4;
+      var CODE_PAGE = 'betrayal.html';
+      var CODE_GAP = 2;  // seconds allowed between presses before the count starts over
+
+      var count = 0, lastPress = 0;
+      window.addEventListener('keydown', function (e) {
+        if (e.repeat) return;  // holding the key down does not count as typing it again
+        // Shift, Cmd and the like are not typing; pressing them alone changes nothing.
+        if (e.key === 'Shift' || e.key === 'Meta' || e.key === 'Control' || e.key === 'Alt') return;
+
+        var now = performance.now();
+        var typed = e.key === CODE_KEY && !e.metaKey && !e.ctrlKey && !e.altKey;
+        if (!typed) { count = 0; return; }
+
+        count = now - lastPress > CODE_GAP * 1000 ? 1 : count + 1;
+        lastPress = now;
+        if (count >= CODE_COUNT) { count = 0; window.location.href = CODE_PAGE; }
+      });
+    })();
   </script>
 
 </body>
